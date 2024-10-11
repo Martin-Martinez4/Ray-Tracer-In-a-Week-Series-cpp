@@ -1,11 +1,11 @@
 To produce a valid ppm file in windows I had to write:
 
 ```
-.\main.exe | set-content image2.ppm -encoding String
+.\main.exe | set-content ./output/<name>.ppm -encoding String
 ```
 
 The standard works in Linux
 
 ```
-a.out > image.ppm
+a > ./output/<name>.ppm
 ```
