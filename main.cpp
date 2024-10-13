@@ -1,33 +1,21 @@
 
 #include "rtweekend.h"
 
+#include "bvh.h"
 #include "camera.h"
 #include "hittable.h"
 #include "hittable_list.h"
 #include "material.h"
 #include "sphere.h"
+#include "texture.h"
 
 
-int main(){
+void bouncing_spheres(){
 
     hittable_list world;
 
-    // auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    // auto material_center = make_shared<lambertian>(color(0.1, 0.2, 0.5));
-    // auto material_left   = make_shared<dielectric>(1.5);
-    // auto material_bubble = make_shared<dielectric>(1.00 / 1.50);
-    // auto material_right  = make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
-
-    // world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
-    // world.add(make_shared<sphere>(point3( 0.0,    0.0, -1.2),   0.5, material_center));
-    // world.add(make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
-    // world.add(make_shared<sphere>(point3(-1.0, 0.0, -1.0), 0.4, material_bubble));
-    // world.add(make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-
-    // auto R = std::cos(pi/4);
-
-       auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, ground_material));
+    auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
+    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(checker)));
 
     for (int a = -11; a < 11; a++) {
         for (int b = -11; b < 11; b++) {
@@ -67,6 +55,8 @@ int main(){
     auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
     world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
+    world = hittable_list(make_shared<bvh_node>(world));
+
     camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
@@ -85,3 +75,80 @@ int main(){
     cam.render(world);
 
 }
+
+void checkered_spheres(){
+    hittable_list world;
+
+    auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
+
+    world.add(make_shared<sphere>(point3(0,-10, 0), 10, make_shared<lambertian>(checker)));
+    world.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+    camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(13,2,3);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+    
+}
+
+void earth(){
+    auto earth_texture = make_shared<image_texture>("earthmap.jpg");
+    auto earth_surface = make_shared<lambertian>(earth_texture);
+    auto globe = make_shared<sphere>(point3(0,0,0), 2, earth_surface);
+
+    camera cam;
+
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+
+    cam.vfov     = 20;
+    cam.lookfrom = point3(0,0,12);
+    cam.lookat   = point3(0,0,0);
+    cam.vup      = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+
+    cam.render(hittable_list(globe));
+}
+
+int main(int argc, char* argv[]){
+
+    std::string choices_names[3] = {"Bouncing Spheres", "Checkered Spheres", "Earth"};
+    std::function<void()> choices[3] = {bouncing_spheres, checkered_spheres, earth};
+
+      if(argc != 2){
+        std::clog << "Wrong number of arguments; excepted 1, got" << argc -1 << "\n"; 
+    }
+
+    switch(argv[1][0]){
+        case '0':
+            std::clog << choices_names[0] << "\n";
+            choices[0]();
+            break;
+        case '1':
+            std::clog << choices_names[1] << "\n";
+            choices[1]();
+            break;
+        case '2':
+            std::clog << choices_names[2] << "\n";
+            choices[2]();
+            break;
+        default:
+            std::clog << "invalid choice, bye \n";
+            return 1;
+    }
+}
+    
