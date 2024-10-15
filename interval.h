@@ -18,7 +18,7 @@ class interval {
         }
 
         bool contains(double x) const {
-            return min <- x && x <= max;
+            return min <= x && x <= max;
         }
 
         bool surrounds(double x) const {
@@ -41,5 +41,13 @@ class interval {
 
 const interval interval::empty = interval(+infinity, -infinity);
 const interval interval::universe = interval(-infinity, +infinity);
+
+interval operator+(const interval& ival, double displacement) {
+    return interval(ival.min + displacement, ival.max + displacement);
+}
+
+interval operator+(double displacement, const interval& ival) {
+    return ival + displacement;
+}
 
 #endif
