@@ -36,7 +36,8 @@ public:
 
     color background;
 
-    void render(const hittable& world) {
+
+    void render(const hittable& world, const hittable& lights)  {
         initialize();
 
         std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -47,7 +48,7 @@ public:
                 color pixel_color(0,0,0);
                 for (int sample = 0; sample < samples_per_pixel; sample++) {
                     ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, max_depth, world);
+                    pixel_color += ray_color(r, max_depth, world, lights);
                 }
                 write_color(std::cout, pixel_sample_scale * pixel_color);
             }
@@ -182,7 +183,7 @@ private:
     }
 
 
-    color ray_color(const ray &r, int depth, const hittable &world){
+    color ray_color(const ray& r, int depth, const hittable& world, const hittable& lights) const {
         if(depth <= 0){
             // Looks familar
             return color(0,0,0);
@@ -196,46 +197,45 @@ private:
         }
 
 
-        ray scattered;
-        color attenuation;
-        double pdf_value;
+        // ray scattered;
+        // color attenuation;
+        // double pdf_value;
+
+        scatter_record srec;
         color color_from_emission = rec.mat->emitted(r, rec, rec.u, rec.v, rec.p);
 
-        if(!rec.mat->scatter(r, rec, attenuation, scattered, pdf_value)){
+        if(!rec.mat->scatter(r, rec, srec)){
             return color_from_emission;
         }
 
-        // auto on_light = point3(random_double(213, 343), 554, random_double(227, 332));
-        // auto to_light = on_light - rec.p;
-        // auto distance_squared = to_light.length_squared();
-        // to_light = unit_vector(to_light);
+        // generate an implicitly sampled ray, to render specular (shiny) materials
+        if (srec.skip_pdf) {
+            return srec.attenuation * ray_color(srec.skip_pdf_ray, depth-1, world, lights);
+        }
 
-        // if(dot(to_light, rec.normal) < 0){
-        //     return color_from_emission;
-        // }
+      
+        // hittable_pdf light_pdf(lights, rec.p);
+        // scattered = ray(rec.p, light_pdf.generate(), r.time());
+        // pdf_value = light_pdf.value(scattered.direction());
 
-        // double light_area = (342-213) * (332-227);
-        // auto light_cosine = std::fabs(to_light.y());
-        // if(light_cosine < 0.000001){
-        //     return color_from_emission;
-        // }
+        // auto p0 = make_shared<hittable_pdf>(lights, rec.p);
+        // auto p1 = make_shared<cosine_pdf>(rec.normal);
+        // mixture_pdf mixed_pdf(p0, p1);
 
+        // scattered = ray(rec.p, mixed_pdf.generate(), r.time());
+        // pdf_value = mixed_pdf.value(scattered.direction());
+
+        auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
+        mixture_pdf p(light_ptr, srec.pdf_ptr);
+
+        ray scattered = ray(rec.p, p.generate(), r.time());
+        auto pdf_value = p.value(scattered.direction());
         
-
-        // double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
-        // pdf_value = scattering_pdf;
-        // double pdf_value = 1 / (2 * pi);
-
-        // pdf_value = distance_squared / (light_cosine * light_area);
-        // scattered = ray(rec.p, to_light, r.time());
-
-        cosine_pdf surface_pdf(rec.normal);
-        scattered = ray(rec.p, surface_pdf.generate(), r.time());
-        pdf_value = surface_pdf.value(scattered.direction());
 
         double scattering_pdf = rec.mat->scattering_pdf(r, rec, scattered);
 
-        color color_from_scatter = (attenuation * scattering_pdf * ray_color(scattered, depth-1, world)) / pdf_value;
+        color sample_color = ray_color(scattered, depth -1, world, lights);
+        color color_from_scatter = (srec.attenuation * scattering_pdf * sample_color) / pdf_value;
 
         return color_from_emission + color_from_scatter;
     }

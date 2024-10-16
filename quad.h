@@ -80,7 +80,7 @@ class quad : public hittable{
             return 0;
         }
 
-        auto distance_squared = rec.t * rec.t * direction.length();
+        auto distance_squared = rec.t * rec.t * direction.length_squared();
         auto cosine = std::fabs(dot(direction, rec.normal) / direction.length());
 
         return distance_squared / (cosine * area);

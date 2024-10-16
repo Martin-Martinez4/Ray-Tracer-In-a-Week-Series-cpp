@@ -59,6 +59,10 @@ void bouncing_spheres(){
     auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
     world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
+    // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
     world = hittable_list(make_shared<bvh_node>(world));
 
     camera cam;
@@ -78,7 +82,7 @@ void bouncing_spheres(){
     cam.focus_dist    = 10.0;
     
 
-    cam.render(world);
+    cam.render(world, lights);
 
 }
 
@@ -89,6 +93,10 @@ void checkered_spheres(){
 
     world.add(make_shared<sphere>(point3(0,-10, 0), 10, make_shared<lambertian>(checker)));
     world.add(make_shared<sphere>(point3(0, 10, 0), 10, make_shared<lambertian>(checker)));
+
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
 
     camera cam;
 
@@ -107,7 +115,7 @@ void checkered_spheres(){
 
 
 
-    cam.render(world);
+    cam.render(world, lights);
     
 }
 
@@ -115,6 +123,10 @@ void earth(){
     auto earth_texture = make_shared<image_texture>("earthmap.jpg");
     auto earth_surface = make_shared<lambertian>(earth_texture);
     auto globe = make_shared<sphere>(point3(0,0,0), 2, earth_surface);
+
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
 
     camera cam;
 
@@ -132,7 +144,7 @@ void earth(){
 
     cam.defocus_angle = 0;
 
-    cam.render(hittable_list(globe));
+    cam.render(hittable_list(globe), lights);
 }
 
 void perlin_spheres(){
@@ -141,6 +153,10 @@ void perlin_spheres(){
     auto pertext = make_shared<noise_texture>(4);
     world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
     world.add(make_shared<sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
+
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
 
     camera cam; 
 
@@ -157,7 +173,7 @@ void perlin_spheres(){
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void quads() {
@@ -177,6 +193,10 @@ void quads() {
     world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
     world.add(make_shared<quad>(point3(-2,-3, 5), vec3(4, 0, 0), vec3(0, 0,-4), lower_teal));
 
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
     camera cam;
 
     cam.aspect_ratio      = 1.0;
@@ -192,7 +212,7 @@ void quads() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void simple_light() {
@@ -205,6 +225,10 @@ void simple_light() {
     auto difflight = make_shared<diffuse_light>(color(4,4,4));
     world.add(make_shared<sphere>(point3(0,7,0), 2, difflight));
     world.add(make_shared<quad>(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), difflight));
+
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
 
     camera cam;
 
@@ -221,7 +245,7 @@ void simple_light() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void cornell_box() {
@@ -249,6 +273,10 @@ void cornell_box() {
     box2 = make_shared<translate>(box2, vec3(130,0,65));
     world.add(box2);
 
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
     camera cam;
 
     cam.aspect_ratio      = 1.0;
@@ -264,7 +292,7 @@ void cornell_box() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void cornell_smoke() {
@@ -293,6 +321,10 @@ void cornell_smoke() {
     world.add(make_shared<constant_medium>(box1, 0.01, color(0,0,0)));
     world.add(make_shared<constant_medium>(box2, 0.01, color(1,1,1)));
 
+     // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
     camera cam;
 
     cam.aspect_ratio      = 1.0;
@@ -308,7 +340,7 @@ void cornell_smoke() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 void final_scene() {
@@ -376,6 +408,10 @@ void final_scene() {
         )
     );
 
+      // Light Sources
+    auto empty_material = shared_ptr<material>();
+    quad lights(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material);
+
     camera cam;
 
     cam.aspect_ratio      = 1.0;
@@ -390,8 +426,8 @@ void final_scene() {
     cam.vup      = vec3(0,1,0);
 
     cam.defocus_angle = 0;
-
-    cam.render(world);
+    
+    cam.render(world, lights);
 }
 
 void cornell_box_revisit(){
@@ -412,23 +448,40 @@ void cornell_box_revisit(){
     // Light
     world.add(make_shared<quad>(point3(213,554,227), vec3(130,0,0), vec3(0,0,105), light));
 
-    // Box 1
+    // Box 1 (shiny)
+    // shared_ptr<material> aluminum = make_shared<metal>(color(0.8, 0.85, 0.88), 0.0);
+    // shared_ptr<hittable> box1 = box(point3(0,0,0), point3(165,330,165), aluminum);
+    // box1 = make_shared<rotate_y>(box1, 15);
+    // box1 = make_shared<translate>(box1, vec3(265,0,295));
+    // world.add(box1);
+
+    // Box 2
+    // shared_ptr<hittable> box2 = box(point3(0,0,0), point3(165,165,165), white);
+    // box2 = make_shared<rotate_y>(box2, -18);
+    // box2 = make_shared<translate>(box2, vec3(130,0,65));
+    // world.add(box2);
+
+    // Box
     shared_ptr<hittable> box1 = box(point3(0,0,0), point3(165,330,165), white);
     box1 = make_shared<rotate_y>(box1, 15);
     box1 = make_shared<translate>(box1, vec3(265,0,295));
     world.add(box1);
 
-    // Box 2
-    shared_ptr<hittable> box2 = box(point3(0,0,0), point3(165,165,165), white);
-    box2 = make_shared<rotate_y>(box2, -18);
-    box2 = make_shared<translate>(box2, vec3(130,0,65));
-    world.add(box2);
+    // Glass Sphere
+    auto glass = make_shared<dielectric>(1.5);
+    world.add(make_shared<sphere>(point3(190,90,190), 90, glass));
 
+    // Light Sources
+    auto empty_material = shared_ptr<material>();
+    hittable_list lights;
+    lights.add(
+        make_shared<quad>(point3(343,554,332), vec3(-130,0,0), vec3(0,0,-105), empty_material));
+    lights.add(make_shared<sphere>(point3(190, 90, 190), 90, empty_material));
     camera cam;
 
     cam.aspect_ratio      = 1.0;
     cam.image_width       = 600;
-    cam.samples_per_pixel = 1000;
+    cam.samples_per_pixel = 300;
     cam.max_depth         = 50;
     cam.background        = color(0,0,0);
 
@@ -439,7 +492,7 @@ void cornell_box_revisit(){
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(world, lights);
 }
 
 int main(int argc, char* argv[]){
